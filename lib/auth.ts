@@ -4,12 +4,13 @@ import { prisma } from "./prisma";
 import { syncUserToNeo4j } from "./neo4j-sync";
 
 export const auth = betterAuth({
-  database: prismaAdapter(prisma, { provider: "postgresql" }),
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
 
   baseURL: process.env.BETTER_AUTH_URL,
 
   trustedOrigins: [
-    "http://localhost:3000",
     "https://gi-smart-teal.vercel.app",
   ],
 
