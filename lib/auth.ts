@@ -5,10 +5,19 @@ import { syncUserToNeo4j } from "./neo4j-sync";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
+
+  baseURL: process.env.BETTER_AUTH_URL,
+
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://gi-smart-teal.vercel.app",
+  ],
+
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 6,
   },
+
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
@@ -17,12 +26,20 @@ export const auth = betterAuth({
       maxAge: 5 * 60,
     },
   },
+
   user: {
     additionalFields: {
-      goal: { type: "string", defaultValue: "General Health" },
-      role: { type: "string", defaultValue: "user" },
+      goal: {
+        type: "string",
+        defaultValue: "General Health",
+      },
+      role: {
+        type: "string",
+        defaultValue: "user",
+      },
     },
   },
+
   databaseHooks: {
     user: {
       create: {
