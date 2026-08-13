@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f5f0e8;
+  --foreground: #1a1a14;
+  --primary: #e05b2b;
+  --low: #2d6a4f;
+  --low-light: #d8f3dc;
+  --medium: #e9a825;
+  --medium-light: #fef3c7;
+  --high: #c1440e;
+  --high-light: #ffe4d6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+  background: #f5f0e8;
+  color: #1a1a14;
+  min-height: 100vh;
+}
