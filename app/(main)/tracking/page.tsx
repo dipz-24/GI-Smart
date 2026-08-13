@@ -52,6 +52,74 @@ function entriesFromDay(day: {
   })) as Record<MealSlot, MealEntry>;
 }
 
+function FoodAutocomplete({
+  id,
+  value,
+  options,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  options: string[];
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const query = value.trim().toLocaleLowerCase();
+  const matches = query.length < 2
+    ? []
+    : options
+        .filter((name) => name.toLocaleLowerCase().includes(query))
+        .sort((a, b) => {
+          const aStarts = a.toLocaleLowerCase().startsWith(query);
+          const bStarts = b.toLocaleLowerCase().startsWith(query);
+          return Number(bStarts) - Number(aStarts) || a.localeCompare(b);
+        })
+        .slice(0, 8);
+
+  return (
+    <div className="relative min-w-0">
+      <Input
+        placeholder="Search food name"
+        value={value}
+        autoComplete="off"
+        role="combobox"
+        aria-expanded={open && matches.length > 0}
+        aria-controls={`${id}-suggestions`}
+        onFocus={() => setOpen(true)}
+        onBlur={() => window.setTimeout(() => setOpen(false), 100)}
+        onChange={(event) => {
+          onChange(event.target.value);
+          setOpen(true);
+        }}
+      />
+      {open && matches.length > 0 && (
+        <div
+          id={`${id}-suggestions`}
+          role="listbox"
+          className="absolute left-0 right-0 top-full z-30 mt-1 max-h-56 overflow-y-auto rounded-xl border border-[rgba(26,26,20,0.14)] bg-white p-1 shadow-xl"
+        >
+          {matches.map((name, index) => (
+            <button
+              key={`${name}-${index}`}
+              type="button"
+              role="option"
+              aria-selected={name === value}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                onChange(name);
+                setOpen(false);
+              }}
+              className="block w-full rounded-lg px-3 py-2 text-left text-sm text-[#1a1a14] hover:bg-[#f5f0e8] focus:bg-[#f5f0e8] focus:outline-none"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TrackingPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
@@ -268,9 +336,6 @@ export default function TrackingPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-[#4a4a3a] mb-4">What happened at each meal?</p>
-              <datalist id="tracking-food-options">
-                {foodOptions.map((name) => <option key={name} value={name} />)}
-              </datalist>
               <div className="space-y-3">
                 {MEAL_SLOTS.map((meal) => {
                   const entry = mealEntries[meal];
@@ -307,11 +372,11 @@ export default function TrackingPage() {
                           <p className="text-xs text-[#68685c]">Add what you actually ate. Nutrition is verified against Neo4j when you save.</p>
                           {entry.foods.map((food, index) => (
                             <div key={`${meal}-${index}`} className="grid grid-cols-[1fr_90px_32px] gap-2">
-                              <Input
-                                list="tracking-food-options"
-                                placeholder="Search food name"
+                              <FoodAutocomplete
+                                id={`${meal.toLowerCase()}-food-${index}`}
                                 value={food.name}
-                                onChange={(event) => updateActualFood(meal, index, { name: event.target.value })}
+                                options={foodOptions}
+                                onChange={(name) => updateActualFood(meal, index, { name })}
                               />
                               <div className="relative">
                                 <Input
